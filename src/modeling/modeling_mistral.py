@@ -40,9 +40,6 @@ warnings.filterwarnings("ignore")
 
 def get_selective_causal_mask(causal_mask: torch.Tensor, start_idx: int, end_idx: int):
     causal_mask_unmasked = causal_mask
-    # for i in range(causal_mask.shape[0]):
-    #     for start, end in zip(start_idx[i], end_idx[i]):
-    #         causal_mask[i, :, start:end, :end] = 0
     for start, end in zip(start_idx, end_idx):
         causal_mask[:, :, start:end, :end] = 0
     return causal_mask_unmasked
@@ -83,17 +80,6 @@ class SelectiveUnmaskingMistralModel(MistralPreTrainedModel):
         if (input_ids is None) ^ (inputs_embeds is not None):
             raise ValueError("You must specify exactly one of input_ids or inputs_embeds")
 
-        # attention_unmask = attention_unmask.squeeze(0)
-        # # diff = attention_unmask.diff(prepend=torch.tensor([0], device=attention_unmask.device))
-        # prepend_shape = (*attention_unmask.shape[:-1], 1)
-        # prepend = torch.zeros(prepend_shape, dtype=attention_unmask.dtype, device=attention_unmask.device)
-        # diff = attention_unmask.diff(dim=-1, prepend=prepend)
-        # start_idx = torch.where(diff==1)[0]
-        # end_idx = torch.where(diff==-1)[0]
-
-        # if attention_unmask[-1] == 1:
-        #     end_idx = torch.cat([end_idx, torch.tensor([len(attention_unmask)], device=end_idx.device)])
-
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids)
 
@@ -118,11 +104,6 @@ class SelectiveUnmaskingMistralModel(MistralPreTrainedModel):
             past_key_values=past_key_values,
             position_ids=position_ids,
         )
-
-        # causal_mask_unmasked = None
-
-        # if start_idx is not None:
-        #     causal_mask_unmasked = get_selective_causal_mask(causal_mask, start_idx, end_idx)
 
         if attention_unmask.dim() == 1:
             attention_unmask = attention_unmask.unsqueeze(0)

@@ -93,31 +93,6 @@ class SelectiveUnmaskingLlamaModel(LlamaPreTrainedModel):
         if (input_ids is None) ^ (inputs_embeds is not None):
             raise ValueError("You must specify exactly one of input_ids or inputs_embeds")
 
-        # attention_unmask = attention_unmask.squeeze(0)
-        # diff = attention_unmask.diff(prepend=torch.tensor([0], device=attention_unmask.device))
-        # start_idx = torch.where(diff==1)[0]
-        # end_idx = torch.where(diff==-1)[0]
-
-        # if attention_unmask[-1] == 1:
-        #     end_idx = torch.cat([end_idx, torch.tensor([len(attention_unmask)], device=end_idx.device)])
-
-        # start_idx = []
-        # end_idx = []
-
-        # for row in attention_unmask:
-        #     diff = row.diff(prepend=torch.tensor([0], device=row.device))
-
-        #     # Find start and end indices for this row
-        #     row_start = torch.where(diff == 1)[0]
-        #     row_end = torch.where(diff == -1)[0]
-            
-        #     # Handle case where last element is 1
-        #     if row[-1] == 1:
-        #         row_end = torch.cat([row_end, torch.tensor([len(row)], device=row_end.device)])
-            
-        #     start_idx.append(row_start)
-        #     end_idx.append(row_end)
-
         if inputs_embeds is None:
             inputs_embeds: torch.Tensor = self.embed_tokens(input_ids)
 
@@ -141,11 +116,6 @@ class SelectiveUnmaskingLlamaModel(LlamaPreTrainedModel):
             past_key_values=past_key_values,
             position_ids=position_ids,
         )
-
-        # causal_mask_unmasked = None
-
-        # if start_idx is not None:
-        #     causal_mask_unmasked = get_selective_causal_mask(causal_mask, start_idx, end_idx)
 
         if attention_unmask.dim() == 1:
             attention_unmask = attention_unmask.unsqueeze(0)

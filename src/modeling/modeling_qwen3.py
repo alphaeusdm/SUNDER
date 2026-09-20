@@ -39,9 +39,6 @@ warnings.filterwarnings("ignore")
 
 def get_selective_causal_mask(causal_mask: torch.Tensor, start_idx: int, end_idx: int):
     causal_mask_unmasked = causal_mask
-    # for i in range(causal_mask.shape[0]):
-    #     for start, end in zip(start_idx[i], end_idx[i]):
-    #         causal_mask[i, :, start:end, :end] = 0
     for start, end in zip(start_idx, end_idx):
         causal_mask[:, :, start:end, :end] = 0
     return causal_mask_unmasked
@@ -82,14 +79,6 @@ class SelectiveUnmaskingQwen3Model(Qwen3PreTrainedModel):
     ) -> BaseModelOutputWithPast:
         if (input_ids is None) ^ (inputs_embeds is not None):
             raise ValueError("You must specify exactly one of input_ids or inputs_embeds")
-
-        # attention_unmask = attention_unmask.squeeze(0)
-        # diff = attention_unmask.diff(prepend=torch.tensor([0], device=attention_unmask.device))
-        # start_idx = torch.where(diff==1)[0]
-        # end_idx = torch.where(diff==-1)[0]
-
-        # if attention_unmask[-1] == 1:
-        #     end_idx = torch.cat([end_idx, torch.tensor([len(attention_unmask)], device=end_idx.device)])
 
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids)
@@ -153,34 +142,6 @@ class SelectiveUnmaskingQwen3Model(Qwen3PreTrainedModel):
 
         causal_mask_unmasked = causal_mask_mapping["full_attention"].masked_fill(same_group, 0)
 
-        # attention_unmask = attention_unmask.squeeze(0)
-        # diff = attention_unmask.diff(prepend=torch.tensor([0], device=attention_unmask.device))
-        # group_ids = (diff == 1).cumsum(0) * attention_unmask
-        # same_group = (group_ids[:, None] == group_ids[None, :]) & (group_ids[:, None] > 0)
-
-        # past_len = past_key_values.get_seq_length() if past_key_values is not None else 0
-        # if past_len > 0:
-        #     q_len  = causal_mask_mapping["full_attention"].shape[2]
-        #     kv_len = causal_mask_mapping["full_attention"].shape[3]
-
-        #     same_group = same_group[-q_len:, :]
-
-        #     if same_group.shape[1] < kv_len:
-        #         pad = torch.zeros(
-        #             q_len, kv_len - same_group.shape[1],
-        #             dtype=same_group.dtype, device=same_group.device
-        #         )
-        #         same_group = torch.cat([pad, same_group], dim=-1)
-
-        #     same_group = same_group[None, None]
-            
-        # causal_mask_unmasked = causal_mask_mapping["full_attention"].masked_fill(same_group, 0)
-
-        # causal_mask_unmasked = None
-
-        # if start_idx is not None:
-        #     causal_mask_unmasked = get_selective_causal_mask(causal_mask_mapping["full_attention"], start_idx, end_idx)
-        
         hidden_states = inputs_embeds
 
         # create position embeddings to be shared across the decoder layers
