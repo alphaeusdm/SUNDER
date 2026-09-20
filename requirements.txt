@@ -1,0 +1,33 @@
+packaging
+setuptools
+wheel
+torch==2.6.0
+accelerate
+sentencepiece
+bitsandbytes
+datasets
+einops
+evaluate
+# flash-attn==2.7.4.post1
+hydra-core
+langchain
+lightning
+opencv-python
+keras
+peft
+pandas
+sentence-transformers
+scikit-learn
+tensorflow
+tqdm
+transformers
+tokenizers
+triton
+trl
+tf-keras
+faiss-gpu
+faiss-cpu
+seqeval
+nltk
+
+--extra-index-url https://download.pytorch.org/whl/cu126
